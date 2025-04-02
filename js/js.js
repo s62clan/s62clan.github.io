@@ -210,7 +210,7 @@ function createParticles() {
 // Обновление таймера
 function updateCountdown() {
     const startDate = new Date('2025-04-02T15:00:00Z');
-    const targetDate = new Date('2025-04-06T15:00:00Z');
+    const targetDate = new Date('2025-04-14T15:00:00Z');
     
     const elements = {
         days: document.getElementById('days'),
