@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S62 Invite Confirmation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary: #002e27;
+        --accent: #007A64;
+        --dark: #000f0c;
+        --glow: rgba(0, 122, 100, 0.3);
+        --neon: #00ffd0;
+        --black-accent: rgba(0, 0, 0, 0.7);
+        --highlight: rgb(227, 255, 249);
+        --text-shadow: 0 0 15px var(--neon), 0 0 30px rgb(255, 255, 255);
+        --gradient-1: #616161;
+        --gradient-2: #000000;
+        --gradient-3: #616161;
+        --gradient-4: #000000;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 1.5;
+        overflow: hidden;
+        animation: bgGradientShift 30s ease-in-out infinite alternate;
+      }
+
+      body {
+        font-family: 'Montserrat', sans-serif;
+        background: #000;
+        color: var(--neon);
+        min-height: 100vh;
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+
+      .copyright {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.8rem;
+        color: var(--neon);
+        opacity: 0.3;
+        z-index: 100;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .copyright:hover {
+        opacity: 0.8;
+      }
+
+      .extras {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .background-container {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        z-index: 1;
+        animation: bgPulse 20s ease-in-out infinite;
+      }
+
+      .living-gradient {
+        position: absolute;
+        inset: -50%;
+        background: radial-gradient(circle at 0% 0%, var(--gradient-1) 0%, transparent 50%),
+          radial-gradient(circle at 100% 0%, var(--gradient-2) 0%, transparent 50%),
+          radial-gradient(circle at 100% 100%, var(--gradient-3) 0%, transparent 50%),
+          radial-gradient(circle at 0% 100%, var(--gradient-4) 0%, transparent 50%);
+        filter: blur(30px) contrast(1.5);
+        opacity: 0.5;
+        animation: gradientMove 30s ease-in-out infinite alternate;
+        transform-origin: center;
+      }
+
+      .living-gradient::before {
+        content: '';
+        position: absolute;
+        inset: -50%;
+        background: radial-gradient(circle at 50% 50%, rgba(0, 255, 208, 0.1), transparent 60%);
+        animation: pulse 12s ease-in-out infinite;
+        opacity: 0.1;
+      }
+
+      .living-gradient::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent 0px,
+          transparent 2px,
+          var(--highlight) 3px,
+          transparent 4px
+        );
+        animation: gridMove 20s linear infinite;
+        opacity: 0.2;
+      }
+
+      .background-pattern {
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 255, 208, 0.1) 3px,
+          transparent 4px
+        );
+        background-size: 200px 200px;
+        animation: patternMove 25s linear infinite;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .gateway-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, var(--dark) 0%, black 70%);
+        pointer-events: auto;
+        transition: opacity 1s ease;
+        animation: neonFlicker 3s ease-in-out infinite alternate;
+      }
+
+      .gateway-screen.hide {
+        opacity: 0;
+      }
+
+      .gateway-button {
+        position: relative;
+        padding: 1.5rem 3.5rem;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.2rem;
+        color: var(--neon);
+        background: transparent;
+        border: 2px solid var(--neon);
+        border-radius: 50px;
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+        text-shadow: var(--text-shadow);
+        opacity: 0;
+        animation: buttonAppear 1.5s 0.5s forwards, buttonPulse 2.5s infinite, buttonSwing 6s ease-in-out infinite;
+        pointer-events: auto;
+      }
+
+      .gateway-button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, var(--highlight), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.8s ease;
+      }
+
+      .gateway-button:hover {
+        transform: scale(1.07);
+        box-shadow: 0 0 40px var(--glow), inset 0 0 15px var(--neon);
+        text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon), 0 0 30px var(--neon);
+      }
+
+      .gateway-button:hover::before {
+        transform: translateX(100%);
+      }
+
+      .main-content {
+        position: relative;
+        min-height: 100vh;
+        z-index: 4;
+        transition: opacity 1s ease;
+        opacity: 0;
+      }
+
+      .main-content.show {
+        opacity: 1;
+      }
+
+      .content-wrapper {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        animation: floatUpDown 8s ease-in-out infinite;
+      }
+
+      .subtitle {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 300;
+        letter-spacing: 0.5em;
+        text-transform: uppercase;
+        background: linear-gradient(
+          45deg,
+          var(--neon) 10%,
+          #ffffff 30%,
+          var(--neon) 50%,
+          #006457 70%,
+          var(--neon) 90%
+        );
+        background-size: 50% auto;
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        margin-bottom: 2rem;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 1.5s 1s forwards, fadeInLeft 1.5s ease-out;
+      }
+
+      .main-title {
+        position: relative;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 1200;
+        letter-spacing: 0.1em;
+        font-size: clamp(4rem, 15vw, 10rem);
+        text-transform: uppercase;
+        background: linear-gradient(
+          45deg,
+          var(--neon) 10%,
+          #ffffff 30%,
+          var(--neon) 50%,
+          #006457 70%,
+          var(--neon) 90%
+        );
+        background-size: 200% auto;
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: shimmer 8s linear infinite;
+        text-shadow: 0 0 15px rgba(0, 255, 208, 0.2);
+      }
+
+      .core-link {
+        display: inline-block;
+        text-decoration: none;
+        transition: transform 0.5s ease;
+      }
+
+      .core-link:hover {
+        transform: scale(1.08) rotate(3deg);
+      }
+
+      .core-button {
+        position: relative;
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        background: rgba(0, 15, 12, 0.3);
+        cursor: pointer;
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+        overflow: visible;
+      }
+
+      .core-button:hover {
+        transform: scale(1.12);
+        box-shadow: 0 0 50px var(--glow), inset 0 0 30px var(--neon);
+      }
+
+      .core-button::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, transparent, var(--neon) 25%, transparent 50%);
+        animation: spinRing 4s linear infinite;
+        opacity: 0.5;
+      }
+
+      .core-button::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: var(--dark);
+        opacity: 0.7;
+      }
+
+      .core-ripple {
+        position: absolute;
+        inset: -20px;
+        border: 2px solid var(--neon);
+        border-radius: 50%;
+        opacity: 0;
+        transform: scale(0.8);
+        animation: rippleEffect 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+
+      .core-button img {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        z-index: 2;
+        filter: contrast(1.2) brightness(1.1);
+        mix-blend-mode: screen;
+        animation: rotateCore 60s linear infinite;
+      }
+
+      .core-glow {
+        position: absolute;
+        inset: -20px;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, var(--neon) 0%, transparent 70%);
+        opacity: 0.3;
+        animation: coreGlow 2s ease-in-out infinite alternate;
+      }
+
+      .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      .music-controls {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .izana-text {
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 6;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.4rem;
+        color: var(--neon);
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.5s ease;
+        text-shadow: 0 0 10px var(--neon),
+                     0 0 20px var(--neon),
+                     0 0 30px var(--neon);
+        animation: textPulse 2s infinite;
+      }
+
+      .izana-text.visible {
+        opacity: 1;
+      }
+
+      .izana-text:hover {
+        animation: neonBlink 0.3s infinite alternate;
+      }
+
+      .background-video {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1.5);
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        z-index: 1;
+        opacity: 0.1;
+        display: none;
+        filter: grayscale(100%) saturate(20%) contrast(350%) blur(2px);
+        transition: all 4s ease;
+        pointer-events: none;
+      }
+
+      @keyframes buttonAppear {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes buttonPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+      }
+
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+
+      @keyframes gradientMove {
+        0% { transform: rotate(0deg) scale(1); }
+        25% { transform: rotate(5deg) scale(1.1); }
+        50% { transform: rotate(-5deg) scale(1); }
+        75% { transform: rotate(3deg) scale(1.05); }
+        100% { transform: rotate(0deg) scale(1); }
+      }
+
+      @keyframes gridMove {
+        from { transform: translateY(0); }
+        to { transform: translateY(100%); }
+      }
+
+      @keyframes patternMove {
+        from { background-position: 0 0; }
+        to { background-position: 200px 200px; }
+      }
+
+      @keyframes shimmer {
+        0% { background-position: 200% center; }
+        100% { background-position: -200% center; }
+      }
+
+      @keyframes spinRing {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      @keyframes rippleEffect {
+        0% { transform: scale(0.8); opacity: 0.02; }
+        100% { transform: scale(1.5); opacity: 0; }
+      }
+
+      @keyframes rotateCore {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      @keyframes neonFlicker {
+        0% { opacity: 0.95; }
+        50% { opacity: 1; }
+        100% { opacity: 0.95; }
+      }
+
+      @keyframes bgPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.01); }
+        100% { transform: scale(1); }
+      }
+
+      @keyframes bgGradientShift {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(20deg); }
+      }
+
+      @keyframes buttonSwing {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(5deg); }
+        50% { transform: rotate(0deg); }
+        75% { transform: rotate(-5deg); }
+        100% { transform: rotate(0deg); }
+      }
+
+      @keyframes floatUpDown {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+
+      @keyframes coreGlow {
+        0% { opacity: 0.2; transform: scale(0.9); }
+        100% { opacity: 0.4; transform: scale(1.1); }
+      }
+
+      @keyframes textPulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+
+      @keyframes neonBlink {
+        from { text-shadow: 0 0 10px var(--neon); }
+        to { text-shadow: 0 0 20px var(--neon),
+                         0 0 30px var(--neon),
+                         0 0 40px var(--neon); }
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.1; }
+        50% { transform: scale(1.2); opacity: 0.2; }
+        100% { transform: scale(1); opacity: 0.1; }
+      }
+
+      @keyframes videoAppear {
+        0% { filter: grayscale(100%) saturate(20%) contrast(350%) blur(3px); }
+        50% { filter: grayscale(80%) saturate(20%) contrast(350%) blur(2px); }
+        100% { filter: grayscale(30%) saturate(20%) contrast(350%) blur(1px); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="copyright">by @quasarexplosion</div>
+    <div class="izana-text" id="izanaText">Izana</div>
+    <div class="music-controls">
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <video class="background-video" id="bgVideo">
+      <source src="video/background.mp4" type="video/mp4">
+    </video>
+
+    <audio id="bgMusic">
+      <source src="Audio/bg.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas class="extras"></canvas>
+    <div class="lightning" id="lightning"></div>
+    <div class="background-pattern"></div>
+    <div class="background-container">
+      <div class="living-gradient"></div>
+    </div>
+
+    <div class="gateway-screen" id="gatewayScreen">
+      <button class="gateway-button" id="initButton">Enter</button>
+    </div>
+
+    <main class="main-content" id="mainContent">
+      <div class="content-wrapper">
+        <div class="subtitle">Yokohama Tenjiku</div>
+        <div class="title-container">
+          <h1 class="main-title">S-62</h1>
+        </div>
+        <a href="https://discord.gg/cF9fkbgsRR" target="_blank" class="core-link">
+          <div class="core-button">
+            <div class="core-ripple"></div>
+            <img src="logo/s62.gif" alt="Core System">
+          </div>
+        </a>
+      </div>
+      <canvas class="particles"></canvas>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const enterBtn = document.getElementById("initButton");
+        const gateway = document.getElementById("gatewayScreen");
+        const mainContent = document.getElementById("mainContent");
+        const video = document.getElementById("bgVideo");
+        const audio = document.getElementById("bgMusic");
+        const izanaBtn = document.getElementById("izanaText");
+        const discordLink = document.querySelector(".core-link");
+        
+        let musicPosition = 0, isMusicPlaying = false, isVideoPlaying = false;
+        let audioContext, analyser, audioSource, currentVolume = 0;
+        let mouseX = 0, mouseY = 0;
+
+        class ParticleSystem {
+          constructor() {
+            this.canvas = document.querySelector(".particles");
+            this.ctx = this.canvas.getContext("2d");
+            this.particles = [];
+            this.subParticles = [];
+            this.mouseRadius = 120;
+            this.init();
+          }
+
+          init() {
+            this.resize();
+            this.createParticles();
+            window.addEventListener("resize", () => this.resize());
+            document.addEventListener("mousemove", (e) => {
+              mouseX = e.clientX;
+              mouseY = e.clientY;
+            });
+            this.animate();
+          }
+
+          resize() {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+          }
+
+          createParticles() {
+            const count = Math.floor((this.canvas.width * this.canvas.height) / 3000);
+            this.particles = Array.from({length: count}, () => this.createParticle());
+          }
+
+          createParticle(x, y, size, isSub = false) {
+            return {
+              x: x ?? Math.random() * this.canvas.width,
+              y: y ?? Math.random() * this.canvas.height,
+              baseSize: size ?? Math.random() * 0.4 + 0.1,
+              speedX: (Math.random() - 0.5) * (isSub ? 1.2 : 0.4),
+              speedY: (Math.random() - 0.5) * (isSub ? 1.2 : 0.4),
+              driftX: (Math.random() - 0.5) * 0.02,
+              driftY: (Math.random() - 0.5) * 0.02,
+              color: `rgba(0, ${Math.floor(Math.random()*55+200)}, ${Math.floor(Math.random()*55+150)}, ${isSub ? 0.4 : 0.6})`,
+              life: isSub ? 0.8 : 1,
+              isSub: isSub
+            };
+          }
+
+          handleMouseInteraction(p) {
+            const dx = mouseX - p.x;
+            const dy = mouseY - p.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if(dist < this.mouseRadius) {
+              const force = (this.mouseRadius - dist)/this.mouseRadius * 0.3;
+              const angle = Math.atan2(dy, dx);
+              
+              p.speedX -= Math.cos(angle) * force;
+              p.speedY -= Math.sin(angle) * force;
+
+              if(!p.isSub && Math.random() > 0.97) {
+                for(let i = 0; i < 3; i++) {
+                  this.subParticles.push(this.createParticle(
+                    p.x, p.y, 
+                    p.baseSize * 0.5, 
+                    true
+                  ));
+                }
+              }
+            }
+          }
+
+          updateParticle(p) {
+            this.handleMouseInteraction(p);
+            
+            p.x += p.driftX + (Math.random() - 0.5) * 0.3;
+            p.y += p.driftY + (Math.random() - 0.5) * 0.3;
+            
+            p.driftX = Math.max(-0.5, Math.min(0.5, p.driftX));
+            p.driftY = Math.max(-0.5, Math.min(0.5, p.driftY));
+
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.speedX *= 0.98;
+            p.speedY *= 0.98;
+
+            if(p.isSub) {
+              p.life -= 0.015;
+              p.baseSize *= 0.97;
+            }
+
+            const sizeMultiplier = 1 + currentVolume * 5;
+            p.currentSize = p.baseSize * sizeMultiplier;
+
+            return !(p.y < -10 || (p.isSub && p.life <= 0));
+          }
+
+          drawParticle(p) {
+            this.ctx.beginPath();
+            this.ctx.fillStyle = p.color;
+            this.ctx.arc(p.x, p.y, p.currentSize, 0, Math.PI*2);
+            this.ctx.fill();
+          }
+
+          animateDiscordButton() {
+            const btn = document.querySelector(".core-button");
+            if(!btn) return;
+            
+            const scale = 0.6 + currentVolume * 2;
+            const rotate = currentVolume * 0;
+            const glow = currentVolume * 250;
+            
+            btn.style.transform = `scale(${scale}) rotate(${rotate}deg)`;
+            btn.style.boxShadow = `0 0 ${glow}px rgba(0, 255, 208, 0.3)`;
+          }
+
+          animate() {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            this.particles.forEach(p => {
+              this.updateParticle(p);
+              this.drawParticle(p);
+            });
+
+            this.subParticles = this.subParticles.filter(p => {
+              if(this.updateParticle(p)) {
+                this.drawParticle(p);
+                return true;
+              }
+              return false;
+            });
+
+            this.animateDiscordButton();
+            requestAnimationFrame(() => this.animate());
+          }
+        }
+
+        const setupAudioAnalyzer = () => {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          analyser = audioContext.createAnalyser();
+          analyser.fftSize = 256;
+          audioSource = audioContext.createMediaElementSource(audio);
+          audioSource.connect(analyser);
+          analyser.connect(audioContext.destination);
+        };
+
+        const analyzeVolume = () => {
+          if(!analyser) return;
+          const data = new Uint8Array(analyser.frequencyBinCount);
+          analyser.getByteFrequencyData(data);
+          currentVolume = data.reduce((a,b) => a + b)/data.length/255;
+          requestAnimationFrame(analyzeVolume);
+        };
+
+        const startMusic = () => {
+          audio.volume = 0;
+          audio.play()
+            .then(() => {
+              if(!audioContext) setupAudioAnalyzer();
+              audioContext.resume();
+              isMusicPlaying = true;
+              izanaBtn.classList.add("visible");
+              const fadeIn = setInterval(() => {
+                audio.volume < 0.7 ? audio.volume += 0.02 : clearInterval(fadeIn);
+              }, 50);
+              analyzeVolume();
+            })
+            .catch(console.error);
+        };
+
+        const stopMusic = () => {
+          const fadeOut = setInterval(() => {
+            if(audio.volume > 0) {
+              audio.volume -= 0.02;
+            } else {
+              clearInterval(fadeOut);
+              audio.pause();
+              isMusicPlaying = false;
+              musicPosition = audio.currentTime;
+            }
+          }, 50);
+        };
+
+        enterBtn.addEventListener("click", () => {
+          gateway.classList.add("hide");
+          gateway.addEventListener("transitionend", () => gateway.style.display = "none");
+          mainContent.classList.add("show");
+          startMusic();
+        });
+
+        izanaBtn.addEventListener("click", async () => {
+          if(isVideoPlaying) return;
+          const originalVolume = audio.volume;
+          
+          if(isMusicPlaying) {
+            const fadeOut = setInterval(() => {
+              if(audio.volume > 0) {
+                audio.volume -= 0.02;
+              } else {
+                clearInterval(fadeOut);
+                audio.pause();
+                isMusicPlaying = false;
+                musicPosition = audio.currentTime;
+              }
+            }, 50);
+          }
+
+          try {
+            isVideoPlaying = true;
+            video.style.display = "block";
+            video.currentTime = 0;
+            await video.play();
+            
+            video.addEventListener('ended', () => {
+              video.style.display = "none";
+              isVideoPlaying = false;
+              if(musicPosition > 0) {
+                audio.currentTime = musicPosition;
+                audio.volume = originalVolume;
+                audio.play();
+                isMusicPlaying = true;
+              }
+            }, { once: true });
+          } catch(err) {
+            console.error("Video error:", err);
+            video.style.display = "none";
+            isVideoPlaying = false;
+          }
+        });
+
+        discordLink.addEventListener("mouseenter", function() {
+          this.style.transform = "scale(1.12) rotate(5deg)";
+        });
+        discordLink.addEventListener("mouseleave", function() {
+          this.style.transform = "scale(1) rotate(0deg)";
+        });
+
+        new ParticleSystem();
+        document.body.style.opacity = "1";
+        setTimeout(() => audio.play().catch(() => {}), 1000);
+      });
+    </script>
+  </body>
+</html>
